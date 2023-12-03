@@ -98,6 +98,19 @@ func (dev *Device) GetDeviceInfo() DeviceInfo {
 	return dev.info
 }
 
+// GetDeviceParams return available endpoints
+func (dev *Device) GetDeviceParams() DeviceParams {
+	return dev.params
+}
+
+func readResponse(resp *http.Response) string {
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+	return string(b)
+}
+
 // GetAvailableDevicesAtSpecificEthernetInterface ...
 func GetAvailableDevicesAtSpecificEthernetInterface(interfaceName string) ([]Device, error) {
 	// Call a ws-discovery Probe Message to Discover NVT type Devices
