@@ -17,7 +17,7 @@ import (
 	wsdiscovery "github.com/ritj/onvif/ws-discovery"
 )
 
-// Xlmns XML Scheam
+// Xlmns XML Schema
 var Xlmns = map[string]string{
 	"onvif":   "http://www.onvif.org/ver10/schema",
 	"tds":     "http://www.onvif.org/ver10/device/wsdl",
@@ -111,7 +111,7 @@ func readResponse(resp *http.Response) string {
 	return string(b)
 }
 
-// GetAvailableDevicesAtSpecificEthernetInterface ...
+//GetAvailableDevicesAtSpecificEthernetInterface ...
 func GetAvailableDevicesAtSpecificEthernetInterface(interfaceName string) ([]Device, error) {
 	// Call a ws-discovery Probe Message to Discover NVT type Devices
 	devices, err := wsdiscovery.SendProbe(interfaceName, nil, []string{"dn:" + NVT.String()}, map[string]string{"dn": "http://www.onvif.org/ver10/network/wsdl"})
