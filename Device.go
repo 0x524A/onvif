@@ -104,7 +104,7 @@ func (dev *Device) GetDeviceParams() DeviceParams {
 }
 
 func readResponse(resp *http.Response) string {
-	b, err := ioutil.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		panic(err)
 	}
