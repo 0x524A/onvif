@@ -1,6 +1,9 @@
 package onvif
 
 import (
+	"net/url"
+	"strings"
+
 	"github.com/ritj/onvif/xsd"
 )
 
@@ -1871,4 +1874,42 @@ type Date struct {
 	Year  xsd.Int `xml:"Year"`
 	Month xsd.Int `xml:"Month"`
 	Day   xsd.Int `xml:"Day"`
+}
+
+// FixEndpointAddresses replaces the host in all XAddr fields with the provided host address
+// only if the host is localhost, 127.0.0.1, or empty.
+// This fixes the issue where cameras return localhost (127.0.0.1) instead of their actual IP.
+func (c *Capabilities) FixEndpointAddresses(deviceXaddr string) {
+	c.Analytics.XAddr = fixXAddr(string(c.Analytics.XAddr), deviceXaddr)
+	c.Device.XAddr = fixXAddr(string(c.Device.XAddr), deviceXaddr)
+	c.Events.XAddr = fixXAddr(string(c.Events.XAddr), deviceXaddr)
+	c.Imaging.XAddr = fixXAddr(string(c.Imaging.XAddr), deviceXaddr)
+	c.Media.XAddr = fixXAddr(string(c.Media.XAddr), deviceXaddr)
+	c.PTZ.XAddr = fixXAddr(string(c.PTZ.XAddr), deviceXaddr)
+}
+
+func fixXAddr(address, deviceXaddr string) xsd.AnyURI {
+	if address == "" {
+		return xsd.AnyURI(address)
+	}
+	if u, err := url.Parse(address); err == nil {
+		if isLocalhostOrEmpty(u.Host) {
+			u.Host = deviceXaddr
+			return xsd.AnyURI(u.String())
+		}
+	}
+	return xsd.AnyURI(address)
+}
+
+// isLocalhostOrEmpty checks if a host is localhost, 127.0.0.1, or empty
+func isLocalhostOrEmpty(host string) bool {
+	if host == "" {
+		return true
+	}
+	// Remove port if present
+	hostname := host
+	if idx := strings.Index(host, ":"); idx != -1 {
+		hostname = host[:idx]
+	}
+	return hostname == "localhost" || hostname == "127.0.0.1" || hostname == ""
 }

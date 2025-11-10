@@ -25,6 +25,11 @@ func Call_GetCapabilities(ctx context.Context, dev *onvif.Device, request device
 		return reply.Body.GetCapabilitiesResponse, errors.Annotate(err, "call")
 	} else {
 		err = sdk.ReadAndParse(ctx, httpReply, &reply, "GetCapabilities")
+		if err == nil {
+			// Fix localhost addresses in the capabilities response
+			deviceParams := dev.GetDeviceParams()
+			reply.Body.GetCapabilitiesResponse.Capabilities.FixEndpointAddresses(deviceParams.Xaddr)
+		}
 		return reply.Body.GetCapabilitiesResponse, errors.Annotate(err, "reply")
 	}
 }

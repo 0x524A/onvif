@@ -205,13 +205,44 @@ func (dev *Device) addEndpoint(Key, Value string) {
 	//make key having ability to handle Mixed Case for Different vendor devcie (e.g. Events EVENTS, events)
 	lowCaseKey := strings.ToLower(Key)
 
-	// Replace host with host from device params.
+	// Replace host with host from device params only if it's localhost or empty.
 	if u, err := url.Parse(Value); err == nil {
-		u.Host = dev.params.Xaddr
-		Value = u.String()
+		if isLocalhostOrEmpty(u.Host) {
+			u.Host = dev.params.Xaddr
+			Value = u.String()
+		}
 	}
 
 	dev.endpoints[lowCaseKey] = Value
+}
+
+// isLocalhostOrEmpty checks if a host is localhost, 127.0.0.1, or empty
+func isLocalhostOrEmpty(host string) bool {
+	if host == "" {
+		return true
+	}
+	// Remove port if present
+	hostname := host
+	if idx := strings.Index(host, ":"); idx != -1 {
+		hostname = host[:idx]
+	}
+	return hostname == "localhost" || hostname == "127.0.0.1" || hostname == ""
+}
+
+// FixEndpointAddress replaces the host in a URL with the device's actual address
+// only if the host is localhost, 127.0.0.1, or empty.
+// This is used to fix localhost addresses that cameras sometimes return.
+func (dev *Device) FixEndpointAddress(address string) string {
+	if address == "" {
+		return address
+	}
+	if u, err := url.Parse(address); err == nil {
+		if isLocalhostOrEmpty(u.Host) {
+			u.Host = dev.params.Xaddr
+			return u.String()
+		}
+	}
+	return address
 }
 
 // GetEndpoint returns specific ONVIF service endpoint address
