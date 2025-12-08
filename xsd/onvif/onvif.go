@@ -834,6 +834,15 @@ type MediaUri struct {
 	Timeout             xsd.Duration
 }
 
+// FixMediaUri replaces localhost/127.0.0.1 in the MediaUri.Uri with the actual camera IP
+// Only replaces if the URI contains localhost, 127.0.0.1, or an empty host
+func (m *MediaUri) FixMediaUri(cameraXAddr string) {
+	if m.Uri == "" {
+		return
+	}
+	m.Uri = fixXAddr(string(m.Uri), cameraXAddr)
+}
+
 type VideoSourceMode struct {
 	Token         ReferenceToken `xml:"token,attr"`
 	Enabled       bool           `xml:"Enabled,attr"`

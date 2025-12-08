@@ -25,6 +25,8 @@ func Call_GetSnapshotUri(ctx context.Context, dev *onvif.Device, request media.G
 		return reply.Body.GetSnapshotUriResponse, errors.Annotate(err, "call")
 	} else {
 		err = sdk.ReadAndParse(ctx, httpReply, &reply, "GetSnapshotUri")
+		// Fix localhost/127.0.0.1 in the snapshot URI with the actual camera IP
+		dev.FixMediaUriResponse(&reply.Body.GetSnapshotUriResponse.MediaUri)
 		return reply.Body.GetSnapshotUriResponse, errors.Annotate(err, "reply")
 	}
 }

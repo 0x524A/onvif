@@ -25,6 +25,8 @@ func Call_GetStreamUri(ctx context.Context, dev *onvif.Device, request media.Get
 		return reply.Body.GetStreamUriResponse, errors.Annotate(err, "call")
 	} else {
 		err = sdk.ReadAndParse(ctx, httpReply, &reply, "GetStreamUri")
+		// Fix localhost/127.0.0.1 in the stream URI with the actual camera IP
+		dev.FixMediaUriResponse(&reply.Body.GetStreamUriResponse.MediaUri)
 		return reply.Body.GetStreamUriResponse, errors.Annotate(err, "reply")
 	}
 }

@@ -120,3 +120,62 @@ func TestDevice_FixEndpointAddress(t *testing.T) {
 		})
 	}
 }
+
+func TestMediaUri_FixMediaUri(t *testing.T) {
+	actualCameraXAddr := "192.168.1.164:80"
+
+	tests := []struct {
+		name     string
+		inputUri string
+		expected string
+	}{
+		{
+			name:     "RTSP with localhost",
+			inputUri: "rtsp://localhost:554/stream1",
+			expected: "rtsp://192.168.1.164:80/stream1",
+		},
+		{
+			name:     "RTSP with 127.0.0.1",
+			inputUri: "rtsp://127.0.0.1:554/stream1",
+			expected: "rtsp://192.168.1.164:80/stream1",
+		},
+		{
+			name:     "HTTP with localhost",
+			inputUri: "http://localhost/media/stream",
+			expected: "http://192.168.1.164:80/media/stream",
+		},
+		{
+			name:     "RTSP with different IP - should NOT be replaced",
+			inputUri: "rtsp://10.0.0.5:554/stream1",
+			expected: "rtsp://10.0.0.5:554/stream1",
+		},
+		{
+			name:     "RTSP with valid camera IP - should NOT be replaced",
+			inputUri: "rtsp://192.168.1.100:554/stream1",
+			expected: "rtsp://192.168.1.100:554/stream1",
+		},
+		{
+			name:     "Empty URI",
+			inputUri: "",
+			expected: "",
+		},
+		{
+			name:     "HTTP with 127.0.0.1 and port",
+			inputUri: "http://127.0.0.1:8080/stream",
+			expected: "http://192.168.1.164:80/stream",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mediaUri := onvif.MediaUri{
+				Uri: xsd.AnyURI(tt.inputUri),
+			}
+			mediaUri.FixMediaUri(actualCameraXAddr)
+			
+			if string(mediaUri.Uri) != tt.expected {
+				t.Errorf("FixMediaUri() = %v, want %v", string(mediaUri.Uri), tt.expected)
+			}
+		})
+	}
+}

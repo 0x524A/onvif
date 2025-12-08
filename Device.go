@@ -15,6 +15,7 @@ import (
 	"github.com/ritj/onvif/gosoap"
 	"github.com/ritj/onvif/networking"
 	wsdiscovery "github.com/ritj/onvif/ws-discovery"
+	xsdonvif "github.com/ritj/onvif/xsd/onvif"
 )
 
 // Xlmns XML Schema
@@ -101,6 +102,20 @@ func (dev *Device) GetDeviceInfo() DeviceInfo {
 // GetDeviceParams return available endpoints
 func (dev *Device) GetDeviceParams() DeviceParams {
 	return dev.params
+}
+
+// FixXAddr fixes localhost/127.0.0.1 addresses in XAddr fields
+// This is a helper to ensure consistent URI fixing across all responses
+func (dev *Device) FixXAddr(addr string) string {
+	return dev.FixEndpointAddress(addr)
+}
+
+// FixMediaUriResponse fixes localhost/127.0.0.1 addresses in MediaUri responses
+// This should be called on GetStreamUri and GetSnapshotUri responses
+func (dev *Device) FixMediaUriResponse(mediaUri *xsdonvif.MediaUri) {
+	if mediaUri != nil {
+		mediaUri.FixMediaUri(dev.params.Xaddr)
+	}
 }
 
 func readResponse(resp *http.Response) string {
