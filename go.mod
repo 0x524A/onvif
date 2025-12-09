@@ -1,4 +1,4 @@
-module github.com/ritj/onvif
+module github.com/0x524a/onvif
 
 go 1.22.0
 
