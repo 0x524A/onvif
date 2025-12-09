@@ -1,7 +1,7 @@
 package event
 
 import (
-	"github.com/ritj/onvif/xsd"
+	"github.com/0x524a/onvif/xsd"
 )
 
 //GetServiceCapabilities action

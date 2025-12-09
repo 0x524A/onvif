@@ -7,7 +7,7 @@ Simple management of onvif IP-devices cameras. onvif is an implementation of  ON
 To install the library,  use **go get**:
 
 ```go
-go get github.com/ritj/onvif
+go get github.com/0x524a/onvif
 
 ```
 
@@ -96,6 +96,89 @@ createUsers := device.CreateUsers{User: onvif.User{Username:"admin", Password:"q
 device := onvif.NewDevice(onvif.DeviceParams{Xaddr: "192.168.13.42:1234", Username: "username", Password: password})
 device.Authenticate("username", "password")
 resp, err := dev.CallMethod(createUsers)
+```
+
+## Automatic Localhost Address Fixing
+
+Some ONVIF cameras incorrectly return `localhost` (127.0.0.1) instead of their actual IP addresses in responses. This library automatically detects and fixes these addresses at multiple levels:
+
+### Architecture
+
+The library implements a **multi-layer approach** to ensure all addresses are correct:
+
+#### 1. Endpoint Caching (Initialization)
+When you create a new device with `NewDevice()`, the library:
+- Calls `GetCapabilities` to discover all available services
+- Caches each service endpoint (Media, PTZ, Events, etc.)
+- **Automatically fixes localhost/127.0.0.1** in cached endpoints
+
+This happens in `addEndpoint()` - so your cached endpoints are always correct.
+
+#### 2. Capabilities Response Fixing
+When you call `GetCapabilities` directly:
+- The response contains `XAddr` fields for each service
+- **Automatically fixed** before the response is returned to you
+- Ensures consistency between cached endpoints and response data
+
+#### 3. Dynamic URI Responses
+For operations that return dynamic URIs (not cached):
+- `GetStreamUri` - Returns RTSP/HTTP stream URLs
+- `GetSnapshotUri` - Returns snapshot image URLs  
+- **Automatically fixed** before responses are returned
+
+### Conservative Approach
+
+The fix only replaces addresses when the camera returns:
+- `localhost`
+- `127.0.0.1`
+- Empty/missing host
+
+**If the camera returns a different IP address, it is preserved as-is.** This ensures cameras configured to use specific network interfaces, proxy servers, or multi-homed setups continue to work correctly.
+
+### What Gets Fixed
+
+| Response Type | Field | Auto-Fixed | Cached |
+|--------------|-------|------------|--------|
+| GetCapabilities | Analytics.XAddr | ✓ | ✓ |
+| GetCapabilities | Device.XAddr | ✓ | ✓ |
+| GetCapabilities | Events.XAddr | ✓ | ✓ |
+| GetCapabilities | Imaging.XAddr | ✓ | ✓ |
+| GetCapabilities | Media.XAddr | ✓ | ✓ |
+| GetCapabilities | PTZ.XAddr | ✓ | ✓ |
+| GetStreamUri | MediaUri.Uri | ✓ | ✗ |
+| GetSnapshotUri | MediaUri.Uri | ✓ | ✗ |
+
+### Manual Fixing (Advanced)
+
+If you need to manually fix addresses:
+
+```go
+// Fix a single endpoint address
+fixedAddress := device.FixEndpointAddress("http://localhost/onvif/media")
+// Returns: "http://192.168.13.42:1234/onvif/media"
+
+// Fix an XAddr field  
+fixedXAddr := device.FixXAddr("http://127.0.0.1/onvif/ptz")
+
+// Fix a MediaUri struct
+device.FixMediaUriResponse(&mediaUri)
+```
+
+### Implementation Details
+
+The localhost detection logic:
+```go
+// Considered localhost:
+"localhost"           -> replaced
+"127.0.0.1"          -> replaced  
+"localhost:554"      -> replaced
+"127.0.0.1:8080"     -> replaced
+""                   -> replaced (empty host)
+
+// Preserved (not localhost):
+"192.168.1.100"      -> preserved
+"10.0.0.5:554"       -> preserved
+"camera.local"       -> preserved
 ```
 
 ## Great Thanks

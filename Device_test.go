@@ -3,8 +3,8 @@ package onvif
 import (
 	"testing"
 
-	"github.com/ritj/onvif/xsd"
-	"github.com/ritj/onvif/xsd/onvif"
+	"github.com/0x524a/onvif/xsd"
+	"github.com/0x524a/onvif/xsd/onvif"
 )
 
 func TestCapabilities_FixEndpointAddresses(t *testing.T) {

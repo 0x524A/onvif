@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ritj/onvif/xsd/iso8601"
+	"github.com/0x524a/onvif/xsd/iso8601"
 )
 
 /*

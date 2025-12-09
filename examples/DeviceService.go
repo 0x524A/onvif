@@ -6,10 +6,10 @@ import (
 	"log"
 	"net/http"
 
-	goonvif "github.com/ritj/onvif"
-	"github.com/ritj/onvif/device"
-	sdk "github.com/ritj/onvif/sdk/device"
-	"github.com/ritj/onvif/xsd/onvif"
+	goonvif "github.com/0x524a/onvif"
+	"github.com/0x524a/onvif/device"
+	sdk "github.com/0x524a/onvif/sdk/device"
+	"github.com/0x524a/onvif/xsd/onvif"
 )
 
 const (
@@ -60,7 +60,7 @@ func main() {
 	if err != nil {
 		log.Println(err)
 	} else {
-		// You could use https://github.com/ritj/onvif/gosoap for pretty printing response
+		// You could use https://github.com/0x524a/onvif/gosoap for pretty printing response
 		fmt.Println(createUserResponse)
 	}
 

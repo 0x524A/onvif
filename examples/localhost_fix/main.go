@@ -6,9 +6,9 @@ import (
 	"log"
 	"net/http"
 
-	goonvif "github.com/ritj/onvif"
-	"github.com/ritj/onvif/device"
-	sdk "github.com/ritj/onvif/sdk/device"
+	goonvif "github.com/0x524a/onvif"
+	"github.com/0x524a/onvif/device"
+	sdk "github.com/0x524a/onvif/sdk/device"
 )
 
 const (

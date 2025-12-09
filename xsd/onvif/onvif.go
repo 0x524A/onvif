@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/ritj/onvif/xsd"
+	"github.com/0x524a/onvif/xsd"
 )
 
 // BUG(r): Enum types implemented as simple string

@@ -11,11 +11,11 @@ import (
 	"strings"
 
 	"github.com/beevik/etree"
-	"github.com/ritj/onvif/device"
-	"github.com/ritj/onvif/gosoap"
-	"github.com/ritj/onvif/networking"
-	wsdiscovery "github.com/ritj/onvif/ws-discovery"
-	xsdonvif "github.com/ritj/onvif/xsd/onvif"
+	"github.com/0x524a/onvif/device"
+	"github.com/0x524a/onvif/gosoap"
+	"github.com/0x524a/onvif/networking"
+	wsdiscovery "github.com/0x524a/onvif/ws-discovery"
+	xsdonvif "github.com/0x524a/onvif/xsd/onvif"
 )
 
 // Xlmns XML Schema

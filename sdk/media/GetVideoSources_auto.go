@@ -7,9 +7,9 @@ package media
 import (
 	"context"
 	"github.com/juju/errors"
-	"github.com/ritj/onvif"
-	"github.com/ritj/onvif/sdk"
-	"github.com/ritj/onvif/media"
+	"github.com/0x524a/onvif"
+	"github.com/0x524a/onvif/sdk"
+	"github.com/0x524a/onvif/media"
 )
 
 // Call_GetVideoSources forwards the call to dev.CallMethod() then parses the payload of the reply as a GetVideoSourcesResponse.
