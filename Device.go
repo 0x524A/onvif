@@ -3,6 +3,7 @@ package onvif
 import (
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -258,6 +259,28 @@ func (dev *Device) FixEndpointAddress(address string) string {
 		}
 	}
 	return address
+}
+
+// DebugPrintEndpoints prints all cached endpoints (useful for debugging localhost issues)
+func (dev *Device) DebugPrintEndpoints() {
+	fmt.Println("=== Cached ONVIF Endpoints ===")
+	for service, endpoint := range dev.endpoints {
+		if u, err := url.Parse(endpoint); err == nil {
+			status := "✓ OK"
+			if isLocalhostOrEmpty(u.Host) {
+				status = "✗ LOCALHOST"
+			}
+			fmt.Printf("%s: %s (%s)\n", service, endpoint, status)
+		} else {
+			fmt.Printf("%s: %s (PARSE ERROR)\n", service, endpoint)
+		}
+	}
+}
+
+// GetEndpointForService returns the endpoint URL for a specific service name (for debugging)
+// For example: GetEndpointForService("media") returns the Media service endpoint
+func (dev *Device) GetEndpointForService(serviceName string) (string, error) {
+	return dev.getEndpoint(serviceName)
 }
 
 // GetEndpoint returns specific ONVIF service endpoint address
