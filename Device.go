@@ -3,7 +3,6 @@ package onvif
 import (
 	"encoding/xml"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -261,20 +260,28 @@ func (dev *Device) FixEndpointAddress(address string) string {
 	return address
 }
 
-// DebugPrintEndpoints prints all cached endpoints (useful for debugging localhost issues)
-func (dev *Device) DebugPrintEndpoints() {
-	fmt.Println("=== Cached ONVIF Endpoints ===")
+// DebugDeviceEndpoints returns all cached endpoints with their status
+// Returns a map where key is service name and value is endpoint URL with status
+func (dev *Device) DebugDeviceEndpoints() map[string]map[string]interface{} {
+	result := make(map[string]map[string]interface{})
 	for service, endpoint := range dev.endpoints {
+		status := "OK"
+		isLocalhost := false
 		if u, err := url.Parse(endpoint); err == nil {
-			status := "✓ OK"
 			if isLocalhostOrEmpty(u.Host) {
-				status = "✗ LOCALHOST"
+				status = "LOCALHOST"
+				isLocalhost = true
 			}
-			fmt.Printf("%s: %s (%s)\n", service, endpoint, status)
 		} else {
-			fmt.Printf("%s: %s (PARSE ERROR)\n", service, endpoint)
+			status = "PARSE_ERROR"
+		}
+		result[service] = map[string]interface{}{
+			"endpoint":    endpoint,
+			"status":      status,
+			"is_localhost": isLocalhost,
 		}
 	}
+	return result
 }
 
 // GetEndpointForService returns the endpoint URL for a specific service name (for debugging)
