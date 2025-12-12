@@ -341,6 +341,13 @@ func (dev Device) CallMethod(method interface{}) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
+	
+	// Validate endpoint before calling
+	if u, parseErr := url.Parse(endpoint); parseErr == nil && isLocalhostOrEmpty(u.Host) {
+		return nil, errors.New("endpoint for service '" + pkg + "' has localhost: " + endpoint + 
+			". Use DebugDeviceEndpoints() to see all cached endpoints")
+	}
+	
 	return dev.callMethodDo(endpoint, method)
 }
 
