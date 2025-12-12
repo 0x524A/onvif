@@ -384,11 +384,14 @@ func (dev Device) callMethodDo(endpoint string, method interface{}) (*http.Respo
 func (dev Device) CallMethodWithLogging(method interface{}) (*http.Response, error) {
 	pkgPath := strings.Split(reflect.TypeOf(method).PkgPath(), "/")
 	pkg := strings.ToLower(pkgPath[len(pkgPath)-1])
+	fmt.Printf("\n=== SOAP REQUEST ===\n")
 
 	endpoint, err := dev.getEndpoint(pkg)
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Printf("Endpoint: %s\n", endpoint)
 	
 	// Validate endpoint before calling
 	if u, parseErr := url.Parse(endpoint); parseErr == nil && isLocalhostOrEmpty(u.Host) {
@@ -401,6 +404,8 @@ func (dev Device) CallMethodWithLogging(method interface{}) (*http.Response, err
 	if err != nil {
 		return nil, err
 	}
+	
+	fmt.Printf("Method: %s\n", reflect.TypeOf(method).Name())
 
 	soap, err := dev.buildMethodSOAP(string(output))
 	if err != nil {
@@ -417,9 +422,6 @@ func (dev Device) CallMethodWithLogging(method interface{}) (*http.Response, err
 	soapString := soap.String()
 	
 	// Print request
-	fmt.Printf("\n=== SOAP REQUEST ===\n")
-	fmt.Printf("Endpoint: %s\n", endpoint)
-	fmt.Printf("Method: %s\n", reflect.TypeOf(method).Name())
 	fmt.Printf("Request Body:\n%s\n", soapString)
 	
 	// Send request
