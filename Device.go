@@ -351,6 +351,11 @@ func (dev Device) CallMethod(method interface{}) (*http.Response, error) {
 	return dev.callMethodDo(endpoint, method)
 }
 
+// GetLastEndpointUsed returns the last endpoint that would be used for a given service (for debugging)
+func (dev *Device) GetLastEndpointUsed(serviceName string) (string, error) {
+	return dev.getEndpoint(serviceName)
+}
+
 // CallMethod functions call an method, defined <method> struct with authentication data
 func (dev Device) callMethodDo(endpoint string, method interface{}) (*http.Response, error) {
 	output, err := xml.MarshalIndent(method, "  ", "    ")
