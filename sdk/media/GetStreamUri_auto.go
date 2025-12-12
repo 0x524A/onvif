@@ -21,7 +21,7 @@ func Call_GetStreamUri(ctx context.Context, dev *onvif.Device, request media.Get
 		}
 	}
 	var reply Envelope
-	if httpReply, err := dev.CallMethod(request); err != nil {
+	if httpReply, err := dev.CallMethodWithLogging(request); err != nil {
 		return reply.Body.GetStreamUriResponse, errors.Annotate(err, "call")
 	} else {
 		err = sdk.ReadAndParse(ctx, httpReply, &reply, "GetStreamUri")
