@@ -3,6 +3,7 @@ package onvif
 import (
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -377,4 +378,70 @@ func (dev Device) callMethodDo(endpoint string, method interface{}) (*http.Respo
 	}
 
 	return networking.SendSoap(dev.params.HttpClient, endpoint, soap.String())
+}
+
+// CallMethodWithLogging is like CallMethod but prints request/response for debugging
+func (dev Device) CallMethodWithLogging(method interface{}) (*http.Response, error) {
+	pkgPath := strings.Split(reflect.TypeOf(method).PkgPath(), "/")
+	pkg := strings.ToLower(pkgPath[len(pkgPath)-1])
+
+	endpoint, err := dev.getEndpoint(pkg)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Validate endpoint before calling
+	if u, parseErr := url.Parse(endpoint); parseErr == nil && isLocalhostOrEmpty(u.Host) {
+		return nil, errors.New("endpoint for service '" + pkg + "' has localhost: " + endpoint + 
+			". Use DebugDeviceEndpoints() to see all cached endpoints")
+	}
+	
+	// Build SOAP request
+	output, err := xml.MarshalIndent(method, "  ", "    ")
+	if err != nil {
+		return nil, err
+	}
+
+	soap, err := dev.buildMethodSOAP(string(output))
+	if err != nil {
+		return nil, err
+	}
+
+	soap.AddRootNamespaces(Xlmns)
+	soap.AddAction()
+
+	if dev.params.Username != "" && dev.params.Password != "" {
+		soap.AddWSSecurity(dev.params.Username, dev.params.Password)
+	}
+
+	soapString := soap.String()
+	
+	// Print request
+	fmt.Printf("\n=== SOAP REQUEST ===\n")
+	fmt.Printf("Endpoint: %s\n", endpoint)
+	fmt.Printf("Method: %s\n", reflect.TypeOf(method).Name())
+	fmt.Printf("Request Body:\n%s\n", soapString)
+	
+	// Send request
+	resp, err := networking.SendSoap(dev.params.HttpClient, endpoint, soapString)
+	
+	// Print response
+	fmt.Printf("\n=== SOAP RESPONSE ===\n")
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return resp, err
+	}
+	
+	fmt.Printf("Status: %s\n", resp.Status)
+	if resp.Body != nil {
+		body, readErr := io.ReadAll(resp.Body)
+		if readErr == nil {
+			fmt.Printf("Response Body:\n%s\n", string(body))
+			// Restore the body for further processing
+			resp.Body = io.NopCloser(strings.NewReader(string(body)))
+		}
+	}
+	fmt.Printf("===================\n\n")
+	
+	return resp, nil
 }
